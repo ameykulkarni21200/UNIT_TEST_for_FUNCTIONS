@@ -1,0 +1,325 @@
+import ast
+import inspect
+import random
+import math
+
+a1 = random.randint(1, 10)
+a2 = random.randint(10, 50)
+a3 = random.randint(50, 100)
+values = [a1, a2, a3, -1, 5.5, 0, 1, -5.5, -5]
+v1 = [None, "invalid_string"]
+
+vs = ['hello', 'Check123', '', 'SpeCial@Char#$', 'The text is very long to check for Long Sentence just to make sure', 'By all way, it check, comma', 'let me use fullstop.Just checking.', 'MORE       SPACE     CHECKING', 'A']
+vs1 = [None, 0]
+
+v2 = [None, [0, "string"]]
+
+def extract_functions_from_code(code):
+    """Extracts function definitions from Python code and returns metadata."""
+    tree = ast.parse(code)
+    functions = []
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef):
+            func_name = node.name
+            args = [arg.arg for arg in node.args.args]
+            docstring = ast.get_docstring(node) or ""
+            functions.append({"name": func_name, "args": args, "docstring": docstring, "node": node})
+
+    return functions
+
+def determine_function_purpose(func_name):
+    """Determine the purpose of a function based on its name."""
+    if func_name.startswith("is_"):
+        return "logical_check"
+    elif func_name.startswith("calculate_") or func_name.startswith("compute_"):
+        return "calculation"
+    elif func_name.startswith("find_") or func_name.startswith("get_"):
+        return "search_or_retrieval"
+    elif func_name.startswith("sort_"):
+        return "sorting"
+    else:
+        return "general"
+
+def mock_inputs(func_purpose, args, valid=True):
+    """Generates mock inputs based on the function's purpose and arguments.
+    Automatically generate edge cases for different types of functions."""
+    mock_data = []
+
+
+    for arg in args:
+        if func_purpose == "logical_check":
+            if valid:
+              if args == 1:
+                # For logical checks like is_prime(), is_even(), etc., provide integers or booleans
+                mock = random.choice(values)
+                mock_data.append(mock)
+                values.remove(mock)
+                #mock_data.append(random.randint(1, 100))
+                #mock_data.extend(-1)
+                #mock_data.extend(5.5)
+                #mock_data.extend(0)
+                #mock_data.extend(1)
+                #mock_data.extend(-5.5)
+                #mock_data.extend(-5)
+              else:
+                unique_pairs = set()
+                while True:
+                  str1, str2 = random.choice(values), random.choice(values)
+                  if (str1, str2) not in unique_pairs:
+                    unique_pairs.add((str1, str2))
+                    mock_data.append((str1, str2))
+                    break
+            else:
+              if args == 1:
+                # Generate invalid inputs (e.g., None, wrong types) to trigger errors
+                mock = random.choice(v1)
+                mock_data.append(mock)
+                v1.remove(mock)
+              else:
+                unique_pairs = set()
+                while True:
+                  str1, str2 = random.choice(v1), random.choice(v1)
+                  if (str1, str2) not in unique_pairs:
+                    unique_pairs.add((str1, str2))
+                    mock_data.append((str1, str2))
+                    break
+        elif func_purpose == "calculation":
+            if valid:
+              if args == 1:
+                # For calculations, provide numbers (int or float)
+                ##mock_data.append(random.uniform(1, 100))
+                mock = random.choice(values)
+                mock_data.append(mock)
+                values.remove(mock)
+                #mock_data.extend(-1)
+                #mock_data.extend(5.5)
+                #mock_data.extend(0)
+                #mock_data.extend(1)
+                #mock_data.extend(-5.5)
+                #mock_data.extend(-5)
+              else:
+                unique_pairs = set()
+                while True:
+                  str1, str2 = random.choice(values), random.choice(values)
+                  if (str1, str2) not in unique_pairs:
+                    unique_pairs.add((str1, str2))
+                    mock_data.append((str1, str2))
+                    break
+            else:
+              if args == 1:
+                # Generate invalid inputs (e.g., None, wrong types) to trigger errors
+                mock = random.choice(v1)
+                mock_data.append(mock)
+                v1.remove(mock)
+              else:
+                unique_pairs = set()
+                while True:
+                  str1, str2 = random.choice(v1), random.choice(v1)
+                  if (str1, str2) not in unique_pairs:
+                    unique_pairs.add((str1, str2))
+                    mock_data.append((str1, str2))
+                    break
+
+        elif func_purpose == "search_or_retrieval":
+                # For search functions, provide lists or strings
+            if valid:
+              if args == 1:
+                # For logical checks like is_prime(), is_even(), etc., provide integers or booleans
+                mock = random.choice(vs)
+                mock_data.append(mock)
+                vs.remove(mock)
+                #mock_data.append(random.randint(1, 100))
+                #mock_data.extend(-1)
+                #mock_data.extend(5.5)
+                #mock_data.extend(0)
+                #mock_data.extend(1)
+                #mock_data.extend(-5.5)
+                #mock_data.extend(-5)
+              else:
+                unique_pairs = set()
+                while True:
+                  str1, str2 = random.choice(vs), random.choice(vs)
+                  if (str1, str2) not in unique_pairs:
+                    unique_pairs.add((str1, str2))
+                    mock_data.append((str1, str2))
+                    break
+            else:
+              if args == 1:
+                # Generate invalid inputs (e.g., None, wrong types) to trigger errors
+                mock = random.choice(vs1)
+                mock_data.append(mock)
+                vs1.remove(mock)
+              else:
+                unique_pairs = set()
+                while True:
+                  str1, str2 = random.choice(vs1), random.choice(vs1)
+                  if (str1, str2) not in unique_pairs:
+                    unique_pairs.add((str1, str2))
+                    mock_data.append((str1, str2))
+                    break
+        elif func_purpose == "sorting":
+                # For sorting, provide lists of numbers
+                if valid:
+                  if args == 1:
+                    mock_data.append([random.uniform(-10, 100) for _ in range(random.randint(2, 15))])
+                  else:
+                    unique_pairs = set()
+                    while True:
+                      t = random.randint(2, 15)
+                      str1, str2 = [random.uniform(-10, 100) for _ in range(t)] , [random.uniform(-10, 100) for _ in range(t)]
+                      if (str1, str2) not in unique_pairs:
+                        unique_pairs.add((str1, str2))
+                        mock_data.append((str1, str2))
+                        break
+                else:
+                  if args == 1:
+                # Generate invalid inputs (e.g., None, wrong types) to trigger errors
+                    mock = random.choice(v2)
+                    mock_data.append(mock)
+                    v2.remove(mock)
+                  else:
+                    unique_pairs = set()
+                    while True:
+                      str1, str2 = random.choice(v2), random.choice(v2)
+                      if (str1, str2) not in unique_pairs:
+                        unique_pairs.add((str1, str2))
+                        mock_data.append((str1, str2))
+                        break
+
+        else:
+                # Default case for unknown functions
+            if valid:
+              if args == 1:
+                # For logical checks like is_prime(), is_even(), etc., provide integers or booleans
+                mock = random.choice(vs)
+                mock_data.append(mock)
+                vs.remove(mock)
+                #mock_data.append(random.randint(1, 100))
+                #mock_data.extend(-1)
+                #mock_data.extend(5.5)
+                #mock_data.extend(0)
+                #mock_data.extend(1)
+                #mock_data.extend(-5.5)
+                #mock_data.extend(-5)
+              else:
+                unique_pairs = set()
+                while True:
+                  str1, str2 = random.choice(vs), random.choice(vs)
+                  if (str1, str2) not in unique_pairs:
+                    unique_pairs.add((str1, str2))
+                    mock_data.append((str1, str2))
+                    break
+            else:
+              if args == 1:
+                # Generate invalid inputs (e.g., None, wrong types) to trigger errors
+                mock = random.choice(vs1)
+                mock_data.append(mock)
+                vs1.remove(mock)
+              else:
+                unique_pairs = set()
+                while True:
+                  str1, str2 = random.choice(vs1), random.choice(vs1)
+                  if (str1, str2) not in unique_pairs:
+                    unique_pairs.add((str1, str2))
+                    mock_data.append((str1, str2))
+                    break
+
+
+            #mock_data.extend(None)  # For is_prime(None)
+            #mock_data.extend("invalid_string")  # For is_prime(invalid_string)
+
+
+
+    return tuple(mock_data)
+
+def run_function_with_mock_data(func, func_purpose, args, valid=True):
+    """Runs the function with mocked data and returns output.
+    If valid is False, it runs with invalid inputs to check for TypeErrors."""
+    mock_data = mock_inputs(func_purpose, args[:len(inspect.signature(func).parameters)], valid=valid)
+
+    try:
+        result = func(*mock_data)
+        return mock_data, result, None  # No error
+    except TypeError as e:
+        return mock_data, None, e  # Capture TypeError
+
+def infer_test_cases(func, func_name):
+    """Generates test cases by running the function with both valid and invalid mock data."""
+    func_purpose = determine_function_purpose(func_name)
+    test_cases = []
+
+    # Valid test cases
+    for i in range(9):  # Run the function multiple times with valid mock inputs
+        mock_data, result, error = run_function_with_mock_data(func, func_purpose, func.__code__.co_varnames, valid=True)
+        test_case = {
+            "input": mock_data,
+            "expected": result,
+            "error": error
+        }
+        test_cases.append(test_case)
+
+    # Invalid test cases (for TypeError checks and edge cases)
+    for i in range(2):  # Run the function with invalid mock inputs
+        mock_data, result, error = run_function_with_mock_data(func, func_purpose, func.__code__.co_varnames, valid=False)
+        test_case = {
+            "input": mock_data,
+            "expected": result,
+            "error": error
+        }
+        test_cases.append(test_case)
+
+    return test_cases
+
+def generate_test_case_code(func_name, test_cases):
+    """Generate test case code for a given function."""
+    test_case_code = []
+    test_case_code.append(f"def test_{func_name}():")
+
+    for case in test_cases:
+        inputs = ", ".join(map(str, case["input"]))
+        if case["error"]:  # If an error is expected
+            test_case_code.append(f"    try:")
+            test_case_code.append(f"        result = {func_name}({inputs})")
+            test_case_code.append(f"        assert False, 'Expected TypeError but got no exception'")
+            test_case_code.append(f"    except TypeError:")
+            test_case_code.append(f"        pass  # TypeError was expected")
+        else:  # If the result is valid
+            expected = case["expected"]
+            test_case_code.append(f"    result = {func_name}({inputs})")
+            test_case_code.append(f"    assert result == {expected}")
+
+    return "\n".join(test_case_code)
+
+def process_file(input_file_path, output_file_path):
+    """Processes the input file and generates test cases automatically."""
+    with open(input_file_path, 'r') as file:
+        code = file.read()
+
+    # Add common libraries like math to local scope
+    local_scope = {"math": math}  # Include math or any other common libraries
+
+    # Dynamically execute the input code
+    exec(code, {}, local_scope)
+
+    functions = extract_functions_from_code(code)
+
+    # Generate test cases and write to output file
+    with open(output_file_path, 'w') as test_file:
+        test_file.write("import pytest\n\n")
+        test_file.write("import math\n\n")  # Ensure math is imported in the test file as well
+        for function in functions:
+            func_name = function['name']
+            if func_name in local_scope:
+                func = local_scope[func_name]
+                test_cases = infer_test_cases(func, func_name)
+                test_case_code = generate_test_case_code(func_name, test_cases)
+                test_file.write(test_case_code)
+                test_file.write("\n\n")
+
+if __name__ == "__main__":
+    input_file_path = input("Enter the path of the code file: ")
+    output_file_path = input("Enter the desired output test file path: ")
+
+    process_file(input_file_path, output_file_path)
+    print(f"Test cases generated and written to {output_file_path}")
